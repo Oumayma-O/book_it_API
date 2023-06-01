@@ -1,0 +1,112 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// USER MODELS
+
+model User {
+  id             String             @id @default(uuid())
+  profilePicture String?
+  createdAt      DateTime           @default(now())
+  firstName      String
+  lastName       String
+  gender         Gender?
+  nationality    String?
+  address        String?
+  role           Role               @default(USER)
+  email          String             @unique
+  password       String
+  phoneNumber    String?
+  dateOfBirth    DateTime?          @db.Date
+  verified       Boolean            @default(false)
+  creditCard     CreditCardDetails? //ONE-TO-ONE
+  preferences    Preferences? //ONE-TO-ONE
+  bookings       Booking[] //ONE-TO-MANY
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Preferences {
+  id       String  @id @default(uuid())
+  currency String?
+  language String?
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model CreditCardDetails {
+  id         String    @id @default(uuid())
+  number     String?
+  cvv        Int?
+  expiryDate DateTime? @db.Date
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Hotel {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  name      String
+  address   String
+  phone     String
+  email     String   @unique
+  password  String
+  stars     Int
+
+  rooms    Room[] //ONE-TO-MANY between Hotel and Room
+  bookings Booking[] //ONE-TO-MANY between Hotel and Booking
+}
+
+model Room {
+  id              String   @id() @default(uuid())
+  kind            RoomKind
+  image           String
+  price           Int
+  numberAvailable Int
+  hotelId         String
+
+  hotel    Hotel     @relation(fields: [hotelId], references: [id])
+  bookings Booking[] //A room can have many bookings
+}
+
+enum RoomKind {
+  STANDARD
+  DELUXE
+  EXECUTIVE
+  PRESIDENTIAL
+}
+
+model Booking {
+  id            String   @id @default(uuid())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  checkInDate   DateTime
+  checkOutDate  DateTime
+  numberOfRooms Int
+  cost          Int
+
+  userId  String
+  roomId  String
+  hotelId String
+  user    User   @relation(fields: [userId], references: [id])
+  room    Room   @relation(fields: [roomId], references: [id])
+  hotel   Hotel  @relation(fields: [hotelId], references: [id])
+}
