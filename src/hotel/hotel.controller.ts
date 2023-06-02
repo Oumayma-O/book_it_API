@@ -27,11 +27,12 @@ export class HotelController {
   async getHotel(@GetHotel() hotelId: string, @Res() res: Response) {
     return await this.hotelService.getHotel(hotelId, res);
   }
-  @UseGuards(HotelAuthGuard)
-  @Get('/mine/rooms')
-  async getAllHotelRooms(@GetHotel() hotelId: string, @Res() res: Response) {
+  //@UseGuards(HotelAuthGuard)
+  @Get('/rooms/:id')
+  async getAllHotelRooms(@Param('id') hotelId: string, @Res() res: Response) {
     return await this.hotelService.getAllHotelRooms(hotelId, res);
   }
+
 
   @UseGuards(HotelAuthGuard)
   @Get('/mine/bookings')

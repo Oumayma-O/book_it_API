@@ -187,7 +187,7 @@ export class HotelService {
         if (!rooms) {
           return this.resHandler.clientError(
             res,
-            'You do not have any rooms yet.',
+            'This hotel is not offering any room options currently.',
           );
         } else {
           return this.resHandler.requestSuccessful({
