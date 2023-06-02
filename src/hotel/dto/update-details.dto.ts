@@ -30,4 +30,8 @@ export class UpdateHotelDto {
   @IsNumber()
   @Type(() => Number)
   stars?: number;
+
+  @IsString()
+  @IsOptional()
+  photo?: string;
 }

@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { GetUser } from '../decorators';
-import { AuthGuard } from '../guards';
+import { AuthGuard} from "../guards";
 import { AuthService } from './auth.service';
 import {
   checkOldPasswordDto,

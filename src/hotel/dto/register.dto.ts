@@ -2,12 +2,12 @@ import { Type } from 'class-transformer';
 import {
   IsEmail,
   IsNotEmpty,
-  IsNumber,
+  IsNumber, IsOptional,
   IsPhoneNumber,
   IsString,
   Max,
-  Min,
-} from 'class-validator';
+  Min
+} from "class-validator";
 
 export class RegisterHotelDto {
   @IsString()
@@ -38,4 +38,8 @@ export class RegisterHotelDto {
   @Min(1)
   @Max(5)
   stars: number;
+
+  @IsOptional()
+  @IsString()
+  photo?: string;
 }

@@ -7,14 +7,17 @@ import {
   Res,
   UseGuards,
   Param,
-  Patch,
-} from '@nestjs/common';
+  Patch, UploadedFile, UseInterceptors
+} from "@nestjs/common";
 import { LoginHotelDto, RegisterHotelDto, UpdateHotelDto } from './dto';
 import { HotelService } from './hotel.service';
 import { Request, Response } from 'express';
 import { GetHotel } from '../decorators';
-import { HotelAuthGuard } from '../guards';
+import {  HotelAuthGuard } from '../guards';
 import { checkOldPasswordDto, ResetPasswordDto } from '../auth/dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+
+
 @Controller('hotels')
 export class HotelController {
   constructor(private hotelService: HotelService) {}
@@ -47,8 +50,9 @@ export class HotelController {
   }
 
   @Post('/register')
-  async registerHotel(@Body() dto: RegisterHotelDto, @Res() res: Response) {
-    return await this.hotelService.registerHotel(dto, res);
+  @UseInterceptors(FileInterceptor('photo'))
+  async registerHotel(@Body() dto: RegisterHotelDto, @UploadedFile() photo: Express.Multer.File, @Res() res: Response) {
+    return await this.hotelService.registerHotel(dto, photo, res);
   }
 
   @Post('/login')
@@ -89,4 +93,11 @@ export class HotelController {
   ) {
     return await this.hotelService.resetPassword(dto, hotelId, res);
   }
+
+  @UseGuards(HotelAuthGuard)
+  @Post('/logout')
+  async logout(@Req() req: Request, @Res() res: Response) {
+    return await this.hotelService.logout(req, res);
+  }
+
 }

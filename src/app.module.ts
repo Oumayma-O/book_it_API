@@ -12,6 +12,9 @@ import { DatabaseModule } from './database/database.module';
 import { HelpersModule } from './helpers/helpers.module';
 import { RoomModule } from './room/room.module';
 import { RoomService } from './room/room.service';
+import { MulterModule } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+
 
 @Module({
   imports: [
@@ -25,6 +28,15 @@ import { RoomService } from './room/room.service';
     DatabaseModule,
     HelpersModule,
     RoomModule,
+    MulterModule.register({
+      storage: diskStorage({
+        destination: './src/images',
+        filename: (req, file, cb) => {
+          return cb(null, file.originalname);
+        },
+      })
+    }),
+
   ],
   providers: [
     AuthService,

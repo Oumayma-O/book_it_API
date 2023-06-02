@@ -95,11 +95,18 @@ export class AuthService {
       } else {
         // save user session
         req.session.userId = user.id;
+        console.log(req.session);
         return this.resHandler.requestSuccessful({
           res,
+          payload: {
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+          },
           message: 'Login successful',
-          status: 200,
-        });
+          status: 200}
+        );
       }
     } catch (err) {
       return this.resHandler.serverError(res, 'Error logging in');

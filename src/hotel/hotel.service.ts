@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable } from "@nestjs/common";
 import { Request, Response } from 'express';
 import { PrismaService } from '../database/database.service';
 import * as argon from 'argon2';
 import { HelpersService } from '../helpers/helpers.service';
 import { LoginHotelDto, RegisterHotelDto, UpdateHotelDto } from './dto';
 import { checkOldPasswordDto, ResetPasswordDto } from '../auth/dto';
+
 @Injectable()
 export class HotelService {
   constructor(
@@ -18,7 +19,7 @@ export class HotelService {
    * @param res Express Response object
    * @returns ResponseHandler
    */
-  async registerHotel(dto: RegisterHotelDto, res: Response) {
+  /*async registerHotel(dto: RegisterHotelDto, res: Response) {
     try {
       // check if hotel exists
       const hotel = await this.prisma.hotel.findUnique({
@@ -39,9 +40,39 @@ export class HotelService {
     } catch (err) {
       return this.resHandler.serverError(res, 'Error registering hotel');
     }
+  }*/
+
+
+  async registerHotel(dto: RegisterHotelDto, photo, res: Response) {
+    try {
+      // Check if hotel exists
+      const hotel = await this.prisma.hotel.findUnique({
+        where: { email: dto.email },
+      });
+
+      if (!hotel) {
+        const password = await argon.hash(dto.password);
+        console.log(photo);
+        const fileName = photo?.originalname; // Get the uploaded file name
+        console.log(fileName);
+
+        await this.prisma.hotel.create({
+          data: { ...dto, password, photo: fileName }, // Update DTO with the file name
+        });
+
+        return this.resHandler.requestSuccessful({
+          res,
+          message: 'Hotel registered successfully',
+        });
+      } else {
+        return this.resHandler.clientError(res, 'Hotel already registered');
+      }
+    } catch (err) {
+      return this.resHandler.serverError(res, 'Error registering hotel');
+    }
   }
 
-  /**
+/**
    *
    * @param dto class containing login details
    * @param req Express Request Object
@@ -66,6 +97,15 @@ export class HotelService {
         req.session.hotelId = hotel.id;
         return this.resHandler.requestSuccessful({
           res,
+          payload: {
+            id: hotel.id,
+            name: hotel.name,
+            address: hotel.address,
+            email: hotel.email,
+            phone: hotel.phone,
+            stars: hotel.stars,
+            photo: hotel.photo
+          },
           message: 'Login successful',
           status: 200,
         });
@@ -224,6 +264,7 @@ export class HotelService {
           phone: true,
           email: true,
           stars: true,
+          photo:true
         },
       });
       return this.resHandler.requestSuccessful({ res, payload: { hotels } });
@@ -339,4 +380,18 @@ export class HotelService {
       return this.resHandler.serverError(res, 'Error updating password');
     }
   }
+
+  async logout(req: Request, res: Response) {
+    try {
+      req.session.destroy(() => {
+        return this.resHandler.requestSuccessful({
+          res,
+          message: 'Logout successful',
+        });
+      });
+    } catch (err) {
+      return this.resHandler.serverError(err, 'Error logging out');
+    }
+  }
+
 }
